@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+
+    <center>
+        <h1>Is Clare or Nina more likely to prefer a specific song? Enter one to find out: </h1>
+
+        <h2>Confusion Matrix for Our Model: </h2>
+
+        <img src="{{href}}" height=600/> <!-- static/model_performance_1.svg" -->
+
+        <form method="POST">
+            <h4>Input a comma-separated list of feature values (refer to table below for appropriate values)</h4>
+            <input name="text">
+            <input type="submit"><br>
+
+            <h3> OR </h3>
+
+            <h4>Input the song name and the song artist</h4>
+            <label>Song: </label>
+            <input name="song">
+            <label>Artist: </label>
+            <input name="artist">
+            <input type="submit"><br>
+        </form>
+
+        <h3>{{model_result}}</h3>
+
+        <table>
+            <tr>
+                <th>MODE</th> 
+                <th>TIME SIGNATURE</th>
+                <th>KEY</th>
+                <th>RELEASE YEAR</th>
+                <th>POPULARITY</th>
+                <th>FREQUENCY</th>
+                <th>DANCEABILITY</th>
+                <th>VALENCE</th>
+                <th>TEMPO</th>
+                <th>SPEECHINESS</th>
+                <th>LIVENESS</th>
+                <th>INSTRUMENTALNESS</th>
+                <th>LOUDNESS</th>
+                <th>ENERGY</th>
+                <th>ACOUSTICNESS</th>
+                <th>MS PLAYED</th>
+            </tr>
+
+            <tr>
+                <td>
+                    'Mode indicates the modality (major or minor) of a track,<br>
+                    the type of scale from which its melodic content is derived.<br>
+                    Major chords are associated with happier songs,<br>
+                    while minor chords appear in more subdued songs.<br>
+                    
+                    Major is represented by 1 and minor is 0.',
+                </td>
+                <td></td>
+                <td>    
+                    'The key the track is in.<br>
+                    Integers map to pitches using standard Pitch Class notation.<br>
+
+                    0 = C, 1 = C♯/D♭, 2 = D, and so on until 11.<br>
+                    If no key was detected, the value is -1.',
+                </td>
+                <td>
+                    The year the track was released.
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                    'Danceability describes how suitable a track is for dancing based on a<br>
+                    combination of musical elements including tempo, rhythm stability, beat strength,<br>
+                    and overall regularity.<br>
+                    
+                    A value of 0.0 is least danceable and 1.0 is most danceable.'
+                </td>
+                <td>    
+                    'A measure describing the musical positiveness conveyed by a track.<br>
+                    Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric),<br>
+                    while tracks with low valence sound more negative (e.g. sad, depressed, angry).<br>
+                    
+                    Valence values range from 0.0 to 1.0.'
+                </td>
+                <td>    
+                    'The overall estimated tempo of a track in beats per minute (BPM).<br>
+                    
+                    The max tempo in this dataset is 220.',
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    'Energy represents a perceptual measure of intensity and activity.<br>
+                    Typically, energetic tracks feel fast, loud, and noisy<br>
+                    
+                    A value of 0.0 is least energetic and 1.0 is most energetic.',
+                </td>
+                <td></td>
+                <td>
+                    The amount of time the track was played for
+                </td>
+            </tr>
+        </table>    
+    </center>
+
+    
+    
+
+    <!-- Include the variable descriptions -->
+
+</body>
+
+</html>
