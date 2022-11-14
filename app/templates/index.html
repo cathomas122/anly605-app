@@ -1,113 +1,314 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<body>
-
+<head>
+    <title>Predicting Song Classification</title>
+    
     <center>
-        <h1>Is Clare or Nina more likely to prefer a specific song? Enter one to find out: </h1>
+        <h1>Does your song input better match Clare's or Nina's Spotify Streaming History from the past year?</h1>
 
-        <h2>Confusion Matrix for Our Model: </h2>
+        <h4>DISCLAIMER: Clare and Nina's music tastes were actually quite similar, so this made it difficult to train a model.<br>
+            The accuracy of this model is 60%,
+            so don't be too disappointed if Clare's or Nina's opinions on the entered song don't match
+            the model's predictions :)</h2>
 
-        <img src="{{href}}" height=600/> <!-- static/model_performance_1.svg" -->
-
-        <form method="POST">
-            <h4>Input a comma-separated list of feature values (refer to table below for appropriate values)</h4>
-            <input name="text">
-            <input type="submit"><br>
-
-            <h3> OR </h3>
-
-            <h4>Input the song name and the song artist</h4>
-            <label>Song: </label>
-            <input name="song">
-            <label>Artist: </label>
-            <input name="artist">
-            <input type="submit"><br>
-        </form>
-
-        <h3>{{model_result}}</h3>
-
-        <table>
-            <tr>
-                <th>MODE</th> 
-                <th>TIME SIGNATURE</th>
-                <th>KEY</th>
-                <th>RELEASE YEAR</th>
-                <th>POPULARITY</th>
-                <th>FREQUENCY</th>
-                <th>DANCEABILITY</th>
-                <th>VALENCE</th>
-                <th>TEMPO</th>
-                <th>SPEECHINESS</th>
-                <th>LIVENESS</th>
-                <th>INSTRUMENTALNESS</th>
-                <th>LOUDNESS</th>
-                <th>ENERGY</th>
-                <th>ACOUSTICNESS</th>
-                <th>MS PLAYED</th>
-            </tr>
-
-            <tr>
-                <td>
-                    'Mode indicates the modality (major or minor) of a track,<br>
-                    the type of scale from which its melodic content is derived.<br>
-                    Major chords are associated with happier songs,<br>
-                    while minor chords appear in more subdued songs.<br>
-                    
-                    Major is represented by 1 and minor is 0.',
-                </td>
-                <td></td>
-                <td>    
-                    'The key the track is in.<br>
-                    Integers map to pitches using standard Pitch Class notation.<br>
-
-                    0 = C, 1 = C♯/D♭, 2 = D, and so on until 11.<br>
-                    If no key was detected, the value is -1.',
-                </td>
-                <td>
-                    The year the track was released.
-                </td>
-                <td></td>
-                <td></td>
-                <td>
-                    'Danceability describes how suitable a track is for dancing based on a<br>
-                    combination of musical elements including tempo, rhythm stability, beat strength,<br>
-                    and overall regularity.<br>
-                    
-                    A value of 0.0 is least danceable and 1.0 is most danceable.'
-                </td>
-                <td>    
-                    'A measure describing the musical positiveness conveyed by a track.<br>
-                    Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric),<br>
-                    while tracks with low valence sound more negative (e.g. sad, depressed, angry).<br>
-                    
-                    Valence values range from 0.0 to 1.0.'
-                </td>
-                <td>    
-                    'The overall estimated tempo of a track in beats per minute (BPM).<br>
-                    
-                    The max tempo in this dataset is 220.',
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>
-                    'Energy represents a perceptual measure of intensity and activity.<br>
-                    Typically, energetic tracks feel fast, loud, and noisy<br>
-                    
-                    A value of 0.0 is least energetic and 1.0 is most energetic.',
-                </td>
-                <td></td>
-                <td>
-                    The amount of time the track was played for
-                </td>
-            </tr>
-        </table>    
+        <h2>Enter a song to find out!</h2>
     </center>
 
+</head>
+
+<style>
+.hovertext {
+    position: relative;
+    border-bottom: 1px dotted black;
+}
+
+.hovertext:before {
+    content: attr(data-hover);
+    visibility: hidden;
+    opacity: 0;
+    width: 500px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 0;
+    transition: opacity 1s ease-in-out;
+
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 110%;
+}
+
+.hovertext:hover:before {
+    opacity: 1;
+    visibility: visible;
+}
+
+td {
+    padding: 0 25px;
+}
+
+span {
+    font-size: 30px
+}
+
+h1 {
+    font-size: 60px
+}
+
+h2 {
+    font-size: 35px
+}
+
+h3 {
+    font-size: 30px
+}
+
+h4 {
+    font-size: 25px;
+    font-style: italic;
+    color: #06309a
+}
+
+.parent { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr; 
+    grid-gap: 20px; 
+    width: 100%; 
+    height: 100%;
+    text-align: center;
+} 
+.child_features { 
+    line-height: 1.5;
+    display: inline-block;
+    vertical-align: middle;
+    text-align:center
+}
+
+.child_output { 
+    margin: 10px; 
+    width: 100%;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.child_matrix {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+    padding: 50px
+}
+</style>
+
+<body style="background-color: #D9FCFF;">
+    <div class='parent'>
+
+        <div class='child_features'>
+            <center> 
+                <ul>
+                    <h2>
+                        Features List
+                    </h2>
+                </ul>   
+
+                <ul>
+                    <span class="hovertext" data-hover="Mode indicates the modality (major or minor) of a track,
+                            the type of scale from which its melodic content is derived.
+                            Major chords are associated with happier songs,
+                            while minor chords appear in more subdued songs.
+                            
+                            Major is represented by 1 and minor is 0.">
+                            MODE (0 or 1)
+                    </span>
+                </ul>
+                            
+                <ul>
+                    <span class="hovertext" data-hover="
+                            An estimated time signature. 
+                            The time signature (meter) is a notational convention 
+                            to specify how many beats are in each bar (or measure). 
+                            
+                            The time signature ranges from 3 to 7 indicating time signatures of 3/4 to 7/4.">
+                            TIME SIGNATURE (3 to 7)
+                    </span>
+
+                </ul>
+                            
+                <ul>
+                    <span class="hovertext" data-hover="The key the track is in.
+                        Integers map to pitches using standard Pitch Class notation.
+
+                        0 = C, 1 = C♯/D♭, 2 = D, and so on until 11.
+                        If no key was detected, the value is -1.">
+                        KEY (0 - 11)
+                    </span> 
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="The year the track was released.">
+                        RELEASE YEAR (any valid year)
+                    </span>
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="A measure of how popular the song is.
+                        Values range from 0 to 100.">
+                        POPULARITY (0 - 100)
+                    </span>
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="How many times the song was played.">
+                        FREQUENCY (0+ )
+                    </span>
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="Danceability describes how suitable a track is for dancing based on a
+                        combination of musical elements including tempo, rhythm stability, beat strength,
+                        and overall regularity.
+                        
+                        A value of 0.0 is least danceable and 1.0 is most danceable.">
+                        DANCEABILITY (0 - 1)
+                    </span>
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="   
+                        A measure describing the musical positiveness conveyed by a track.
+                        Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric),
+                        while tracks with low valence sound more negative (e.g. sad, depressed, angry).
+                        
+                        Valence values range from 0.0 to 1.0.">
+                        VALENCE (0 - 1)
+                    </span>
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="The overall estimated tempo of a track in beats per minute (BPM).
+                        The max tempo in this dataset is 220.">
+                        TEMPO (0 - 220)
+                    </span>
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="
+                        Speechiness detects the presence of spoken words in a track. 
+                        The more exclusively speech-like the recording 
+                        (e.g. talk show, audio book, poetry), 
+                        the closer to 1.0 the attribute value. 
+                        
+                        Values above 0.66 describe tracks that are probably made entirely of spoken words. 
+                        Values between 0.33 and 0.66 describe tracks that may contain both music and speech, 
+                        either in sections or layered, including such cases as rap music. 
+                        Values below 0.33 most likely represent music and other non-speech-like tracks.">
+                        SPEECHINESS (0 - 1)
+                    </span>
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="
+                        Detects the presence of an audience in the recording. 
+                        Higher liveness values represent an increased probability 
+                        that the track was performed live. 
+                        
+                        A value above 0.8 provides strong likelihood that the track is live.">
+                        LIVENESS (0 - 1)
+                    </span>
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="
+                        Predicts whether a track contains no vocals. 
+                        'Ooh' and 'aah' sounds are treated as instrumental in this context. 
+                        Rap or spoken word tracks are clearly 'vocal'. 
+
+                        The closer the instrumentalness value is to 1.0, the greater likelihood the track contains no vocal content. 
+                        Values above 0.5 are intended to represent instrumental tracks, but confidence is higher as the value approaches 1.0.">
+                        INSTRUMENTALNESS (0 - 1)
+                    </span>
+                </ul>
+                <ul>
+                    <span class="hovertext" data-hover="
+                        The overall loudness of a track in decibels (dB). 
+                        Loudness values are averaged across the entire track 
+                        and are useful for comparing relative loudness of tracks. 
+                        Loudness is the quality of a sound that is the primary 
+                        psychological correlate of physical strength (amplitude). 
+                        
+                        Values typically range between -60 and 0 db.">
+                        LOUDNESS (-60 - 0)
+                    </span>
+                </ul>
+
+                <ul>
+                    <span class="hovertext" data-hover="
+                        Energy represents a perceptual measure of intensity and activity.
+                        Typically, energetic tracks feel fast, loud, and noisy
+                        
+                        A value of 0.0 is least energetic and 1.0 is most energetic.'">
+                        ENERGY (0 - 1)
+                    </span>
+                </ul>
+                <td>
+                    <span class="hovertext" data-hover="
+                        A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 
+                        
+                        1.0 represents high confidence the track is acoustic.">
+                        ACOUSTICNESS (0 - 1)
+                    </span>
+                </td>
+                <ul>
+                    <span class="hovertext" data-hover="
+                        The amount of time the track was played for">
+                        MS PLAYED (ms)
+                    </span>
+                </ul>
+            </center>
+
+        </div> 
+
+        <div class='child_output'>
+            <center>
+                <form method="POST">
+                    <h3 style="color: #06309a; font-style: italic;">Input a comma-separated list of feature values (16)</h3>
+                    <input name="text"  style="font-size: 25px">
+                    <input type="submit" style="color: #06309a; font-size: 25px; font-style: bold;">
+                    <br>
+
+                    <h3> OR </h3>
+
+                    <h3 style="color: #06309a; font-style: italic;">Input the song name and the song artist</h3>
+                    <label style="color: #06309a; font-size: 25px; font-style: bold;">SONG: </label>
+                    <input name="song"  style="font-size: 25px">
+                    <label style="color: #06309a; font-size: 25px; font-style: bold;">ARTIST: </label>
+                    <input name="artist" style="font-size: 25px">
+                    <input type="submit" style="color: #06309a; font-size: 25px; font-style: bold;"><br>
+                </form>
+
+                <h3>{{model_result}}</h3>
+
+            </center>
+
+            <center>
+                <img src="{{song_image}}" height=500/>
+                
+                <br>
+
+                <audio controls>
+                    <source src="{{song_preview}}" />
+                </audio>
+            </center>
+
+
+        </div>
     
+        <div class='child_matrix'>
+            <center>
     
+                <h2>Confusion Matrix for Our Model: </h2>
+    
+                <img src="{{href}}" height=500/> <!-- static/model_performance_1.svg" -->
+        </div>
+    
+            
+                
+
+    </div>
 
     <!-- Include the variable descriptions -->
 

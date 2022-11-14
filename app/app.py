@@ -51,7 +51,7 @@ def hello_world():
         # -------------------------------------------------------------------- # 
         # LOAD THE DATA
         # -------------------------------------------------------------------- # 
-        filename = '../merged_streaming_history.csv' # may need to change the file path 
+        filename = 'merged_streaming_history.csv' # may need to change the file path 
         df = pd.read_csv(filename, header=0)
 
         grouped_file = 'merged_grouped.csv'
@@ -75,17 +75,6 @@ def hello_world():
         df['release_date'] = pd.DatetimeIndex(df['release_date']).year
         grouped_songs['release_date'] = pd.DatetimeIndex(grouped_songs['release_date']).year
 
-        # -------------------------------------------------------------------- # 
-        # IDENTIFY THE X AND Y VARIABLES IN THE DATASET
-        # -------------------------------------------------------------------- # 
-        x_df = df.loc[:, df.columns != 'label'].to_numpy()
-        y_df = df.iloc[:,-1:].to_numpy()
-
-        # -------------------------------------------------------------------- #
-        # SPLIT THE DATA
-        # -------------------------------------------------------------------- #
-        x_train, x_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.30, random_state=0)
-
         # -------------------------------------------------------------------- #
         # LOAD THE MODEL WITH DETAILS
         # -------------------------------------------------------------------- #
@@ -99,6 +88,9 @@ def hello_world():
         #
         # -------------------------------------------------------------------- #
         text = request.form['text']
+        song_image = ""
+        song_preview = "www.google.com"
+
 
         if text != "":
             print(text)
@@ -120,7 +112,7 @@ def hello_world():
             # -------------------------------------------------------------------- #
             song = request.form['song']
             artist = request.form['artist']
-
+            
             # -------------------------------------------------------------------- #
             # CHECK IF THE SONG NAME & ARTIST ARE IN THE DATASET ALREADY 
             #   – From there, extract the feature values from the dataset, as well
@@ -129,12 +121,13 @@ def hello_world():
             # -------------------------------------------------------------------- #
             print(song)
             print(artist)
+
            
             avg_freq = sum(df['frequency'])/len(df.index)
             avg_ms = sum(df['ms_played'])/len(df.index) # find average ms_played so that it doesn't have a huge impact on algorithm
 
             artists = grouped_songs[grouped_songs['track_name'] == song]
-            correct = artists[artists['artist_name'] == artist] # will have multiple rows if the song exists in the dataset
+            correct = artists[artists['artist_name'] == artist].reset_index(drop = True) # will have multiple rows if the song exists in the dataset
 
             try:
                 if len(correct.index) != 0: # extract features of selected song 
@@ -142,6 +135,14 @@ def hello_world():
                                             'valence', 'tempo', 'speechiness', 'liveness', 'instrumentalness', 'loudness', 'energy',
                                             'acousticness']]
                     feature_values['ms_played'] = avg_ms   
+
+                    print(correct)
+
+                    song_image = correct.iloc[0]['images']
+                    song_preview = correct.iloc[0]['preview']
+
+                    print(song_image)
+                    print(song_preview)
 
                     np_arr = floatsome_to_np_array(feature_values.values).reshape(1, -1) # The feature values that are extracted will be assigned to np_arr
                 else: # in the event that the song doesn't exist in the dataset
@@ -175,6 +176,9 @@ def hello_world():
 
                     feature_values['frequency'] = avg_freq
                     feature_values['ms_played'] = avg_ms 
+
+                    song_image = all_features_df.loc[0,'images']
+                    song_preview = all_features_df.loc[0, 'preview']
                     
                     np_arr = floatsome_to_np_array(feature_values.iloc[0].values).reshape(1, -1)
             except:
@@ -187,8 +191,8 @@ def hello_world():
         except:
             model_result = 'Model result did not work. Try a different input!'
 
-        return render_template('index.html', href = path, model_result = model_result)
-    
+        return render_template('index.html', href = path, model_result = model_result, 
+                                song_image = song_image, song_preview = song_preview)
     
 
 def find_song_id(song, artist):
