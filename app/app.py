@@ -5,6 +5,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import pickle
+import os
 import uuid
 from matplotlib import rcParams
 import seaborn as sns
@@ -14,6 +15,8 @@ import spotipy.util as util
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.oauth2 import SpotifyOAuth
 import spotipy
+
+
 
 # -------------------------------------------------------------------------- #
 #
@@ -37,11 +40,11 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id = client_id,
 
 app = Flask(__name__)
 
+
 @app.route("/", methods = ['GET', 'POST'])
 
-
 def hello_world():
-    
+
     request_type_str = request.method 
     path = "static/confusion_matrix_stacked.jpg" # keep this one static for now
 
@@ -122,7 +125,7 @@ def hello_world():
             print(song)
             print(artist)
 
-           
+        
             avg_freq = sum(df['frequency'])/len(df.index)
             avg_ms = sum(df['ms_played'])/len(df.index) # find average ms_played so that it doesn't have a huge impact on algorithm
 
@@ -141,10 +144,13 @@ def hello_world():
                     song_image = correct.iloc[0]['images']
                     song_preview = correct.iloc[0]['preview']
 
-                    print(song_image)
-                    print(song_preview)
+                    # need to rearrange the columns
+                    # ms_played	frequency	release_date	popularity	acousticness	danceability	energy	key	instrumentalness	liveness	loudness	mode	speechiness	valence	tempo	time_signature	label
+                    feature_values_arranged = feature_values[['ms_played', 'frequency', 'release_date', 'popularity', 'acousticness', 
+                                                            'danceability',	'energy',	'key',	'instrumentalness',	'liveness',	'loudness',	
+                                                            'mode',	'speechiness',	'valence',	'tempo', 'time_signature']]
 
-                    np_arr = floatsome_to_np_array(feature_values.values).reshape(1, -1) # The feature values that are extracted will be assigned to np_arr
+                    np_arr = floatsome_to_np_array(feature_values_arranged.values).reshape(1, -1) # The feature values that are extracted will be assigned to np_arr
                 else: # in the event that the song doesn't exist in the dataset
                     print('Searching spotify API')
                     track_id = find_song_id(song, artist)
@@ -179,8 +185,13 @@ def hello_world():
 
                     song_image = all_features_df.loc[0,'images']
                     song_preview = all_features_df.loc[0, 'preview']
+
+                    feature_values_arranged = feature_values[['ms_played', 'frequency', 'release_date', 'popularity', 'acousticness', 
+                                                            'danceability',	'energy',	'key',	'instrumentalness',	'liveness',	'loudness',	
+                                                            'mode',	'speechiness',	'valence',	'tempo', 'time_signature']]
+                    print(feature_values_arranged)
                     
-                    np_arr = floatsome_to_np_array(feature_values.iloc[0].values).reshape(1, -1)
+                    np_arr = floatsome_to_np_array(feature_values_arranged.iloc[0].values).reshape(1, -1)
             except:
                 print('Exception thrown!')
                 model_result = 'Song search did not work. Try a different input!'
@@ -193,7 +204,7 @@ def hello_world():
 
         return render_template('index.html', href = path, model_result = model_result, 
                                 song_image = song_image, song_preview = song_preview)
-    
+
 
 def find_song_id(song, artist):
     not_found = np.nan # set the default return value
@@ -327,3 +338,7 @@ def floatsome_to_np_array(floats_vect):
         floats = np.array([float(x) for x in floats_vect if is_float(x)])
     return floats.reshape(len(floats), 1)
     
+
+if __name__ == "__main__":
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
