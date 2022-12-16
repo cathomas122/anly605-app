@@ -8,8 +8,9 @@ Our best model was a stacked model with 60% accuracy. We used our model to build
 
 ## To Run 
 1. Download the `app` folder
-2. Inside Terminal (or any Python IDE), navigate to inside the `app` folder and install the required dependencies using: `pip install -r requirements.txt`
-3. Run the app: `flask run`
-4. Copy and paste the generated URL into Google Chrome.
-5. Have fun! 
+2. Inside Terminal (or any Python IDE), navigate to inside the `app` folder and install the required dependencies using: 
+`pip install -r requirements.txt`
+4. Run the app: `flask run`
+5. Copy and paste the generated URL into Google Chrome.
+6. Have fun! 
 
